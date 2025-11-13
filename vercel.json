@@ -1,0 +1,10 @@
+{
+  "buildCommand": "git submodule update --init --recursive && npx quartz build",
+  "outputDirectory": "public",
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "destination": "/:path*.html"
+    }
+  ]
+}
