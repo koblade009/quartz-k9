@@ -1,0 +1,35 @@
+name: Sync Obsidian Vault
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'content/**'  # Only trigger if submodule changes (optional safety)
+
+  # ALSO: Trigger when vault repo updates
+  repository_dispatch:
+    types: [ vault-updated ]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Quartz repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}  # Needed to push
+
+      - name: Update submodule to latest
+        run: |
+          git submodule update --init --recursive
+          cd content
+          git fetch origin
+          git checkout main
+          git pull origin main
+          cd ..
+          git add content
+          git config user.name "github-actions[bot]"
+          git config user.email "41898220+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Auto-sync: Update Obsidian vault $(date '+%b %d, %Y')" || echo "No changes"
+          git push origin main
